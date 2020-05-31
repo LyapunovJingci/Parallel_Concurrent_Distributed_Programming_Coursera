@@ -1,5 +1,7 @@
 package edu.coursera.parallel;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.ForkJoinPool;
 
@@ -74,11 +76,7 @@ public final class ReciprocalArraySum {
             final int nElements) {
         final int chunkSize = getChunkSize(nChunks, nElements);
         final int end = (chunk + 1) * chunkSize;
-        if (end > nElements) {
-            return nElements;
-        } else {
-            return end;
-        }
+        return Math.min(end, nElements);
     }
 
     /**
@@ -127,7 +125,10 @@ public final class ReciprocalArraySum {
 
         @Override
         protected void compute() {
-            // TODO
+            value = 0;
+            for (int i = startIndexInclusive; i < endIndexExclusive; i++){
+                value += 1/input[i];
+            }
         }
     }
 
@@ -144,11 +145,15 @@ public final class ReciprocalArraySum {
         assert input.length % 2 == 0;
 
         double sum = 0;
+        ReciprocalArraySumTask leftArray =
+                new ReciprocalArraySumTask(0, input.length/2, input);
 
-        // Compute sum of reciprocals of array elements
-        for (int i = 0; i < input.length; i++) {
-            sum += 1 / input[i];
-        }
+        ReciprocalArraySumTask rightArray =
+                new ReciprocalArraySumTask((input.length/2), input.length, input);
+        leftArray.fork();
+        rightArray.compute();
+        leftArray.join();
+        sum = leftArray.value + rightArray.value;
 
         return sum;
     }
@@ -167,11 +172,28 @@ public final class ReciprocalArraySum {
             final int numTasks) {
         double sum = 0;
 
-        // Compute sum of reciprocals of array elements
-        for (int i = 0; i < input.length; i++) {
-            sum += 1 / input[i];
+        List<ReciprocalArraySumTask> tasks = new ArrayList<>();
+        for (int i = 0; i < numTasks; i++){
+            tasks.add(new ReciprocalArraySumTask(getChunkStartInclusive(i, numTasks, input.length),
+                    getChunkEndExclusive(i, numTasks, input.length),
+                    input));
+            if (i != numTasks-1){
+                tasks.get(i).fork();
+            }
+        }
+        tasks.get(numTasks-1).compute();
+
+        int index = 0;
+        while (index < numTasks-1) {
+            tasks.get(index).join();
+            index++;
+        }
+
+        for (int i = 0; i < numTasks; i++){
+            sum += tasks.get(i).getValue();
         }
 
         return sum;
     }
+
 }
