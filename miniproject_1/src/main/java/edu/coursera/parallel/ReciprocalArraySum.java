@@ -114,7 +114,6 @@ public final class ReciprocalArraySum {
             this.endIndexExclusive = setEndIndexExclusive;
             this.input = setInput;
         }
-
         /**
          * Getter for the value produced by this task.
          * @return Value produced by this task
@@ -150,10 +149,11 @@ public final class ReciprocalArraySum {
 
         ReciprocalArraySumTask rightArray =
                 new ReciprocalArraySumTask((input.length/2), input.length, input);
+
         leftArray.fork();
         rightArray.compute();
         leftArray.join();
-        sum = leftArray.value + rightArray.value;
+        sum = leftArray.getValue() + rightArray.getValue();
 
         return sum;
     }
@@ -177,21 +177,15 @@ public final class ReciprocalArraySum {
             tasks.add(new ReciprocalArraySumTask(getChunkStartInclusive(i, numTasks, input.length),
                     getChunkEndExclusive(i, numTasks, input.length),
                     input));
-            if (i != numTasks-1){
-                tasks.get(i).fork();
-            }
-        }
-        tasks.get(numTasks-1).compute();
-
-        int index = 0;
-        while (index < numTasks-1) {
-            tasks.get(index).join();
-            index++;
         }
 
-        for (int i = 0; i < numTasks; i++){
+        ReciprocalArraySumTask.invokeAll(tasks);
+
+        for (int i = 0; i< numTasks; i++){
+            tasks.get(i).join();
             sum += tasks.get(i).getValue();
         }
+
 
         return sum;
     }
