@@ -36,7 +36,7 @@ public final class StudentAnalytics {
     }
 
     /**
-     * TODO compute the average age of all actively enrolled students using
+     * Compute the average age of all actively enrolled students using
      * parallel streams. This should mirror the functionality of
      * averageAgeOfEnrolledStudentsImperative. This method should not use any
      * loops.
@@ -45,8 +45,11 @@ public final class StudentAnalytics {
      * @return Average age of enrolled students
      */
     public double averageAgeOfEnrolledStudentsParallelStream(
-            final Student[] studentArray) {
-        throw new UnsupportedOperationException();
+        final Student[] studentArray) {
+        if (Stream.of(studentArray).parallel().filter(s->s.checkIsCurrent()).mapToDouble(s->s.getAge()).average().isPresent()) {
+            return Stream.of(studentArray).parallel().filter(s->s.checkIsCurrent()).mapToDouble(s->s.getAge()).average().getAsDouble();
+        }
+        return -1;
     }
 
     /**
