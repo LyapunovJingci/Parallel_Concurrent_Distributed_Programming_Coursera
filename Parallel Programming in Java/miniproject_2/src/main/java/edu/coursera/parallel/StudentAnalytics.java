@@ -49,12 +49,12 @@ public final class StudentAnalytics {
     public double averageAgeOfEnrolledStudentsParallelStream(
         final Student[] studentArray) {
 
-        return Stream.of(studentArray)
-                .parallel()
-                .filter(s->s.checkIsCurrent())
-                .mapToDouble(s->s.getAge())
-                .average()
-                .getAsDouble();
+            return Stream.of(studentArray)
+                    .parallel()
+                    .filter(s -> s.checkIsCurrent())
+                    .mapToDouble(s -> s.getAge())
+                    .average()
+                    .getAsDouble();
 
     }
 
@@ -111,9 +111,10 @@ public final class StudentAnalytics {
             final Student[] studentArray) {
 
         return Stream.of(studentArray)
-                .filter(s->!s.checkIsCurrent())
-                .map(s->s.getFirstName())
-                .collect(Collectors.groupingByConcurrent(n->n, Collectors.counting()))
+                .parallel()
+                .filter(s -> !s.checkIsCurrent())
+                .map(s -> s.getFirstName())
+                .collect(Collectors.groupingBy(n -> n, Collectors.counting()))
                 .entrySet()
                 .stream()
                 .max(Map.Entry.comparingByValue())
@@ -157,7 +158,7 @@ public final class StudentAnalytics {
 
         return (int) Stream.of(studentArray)
                 .parallel()
-                .filter(s -> !s.checkIsCurrent() && s.getAge()>20 && s.getGrade() < 65)
+                .filter(s -> !s.checkIsCurrent() && s.getAge() > 20 && s.getGrade() < 65)
                 .count();
     }
 }
