@@ -48,10 +48,14 @@ public final class StudentAnalytics {
      */
     public double averageAgeOfEnrolledStudentsParallelStream(
         final Student[] studentArray) {
-        if (Stream.of(studentArray).parallel().filter(s->s.checkIsCurrent()).mapToDouble(s->s.getAge()).average().isPresent()) {
-            return Stream.of(studentArray).parallel().filter(s->s.checkIsCurrent()).mapToDouble(s->s.getAge()).average().getAsDouble();
-        }
-        return -1;
+
+        return Stream.of(studentArray)
+                .parallel()
+                .filter(s->s.checkIsCurrent())
+                .mapToDouble(s->s.getAge())
+                .average()
+                .getAsDouble();
+
     }
 
     /**
@@ -95,7 +99,7 @@ public final class StudentAnalytics {
     }
 
     /**
-     * TODO Compute the most common first name out of all students that are no
+     * Compute the most common first name out of all students that are no
      * longer active in the class using parallel streams. This should mirror the
      * functionality of mostCommonFirstNameOfInactiveStudentsImperative. This
      * method should not use any loops.
@@ -106,10 +110,15 @@ public final class StudentAnalytics {
     public String mostCommonFirstNameOfInactiveStudentsParallelStream(
             final Student[] studentArray) {
 
-
-
-
-        return null;
+        return Stream.of(studentArray)
+                .filter(s->!s.checkIsCurrent())
+                .map(s->s.getFirstName())
+                .collect(Collectors.groupingByConcurrent(n->n, Collectors.counting()))
+                .entrySet()
+                .stream()
+                .max(Map.Entry.comparingByValue())
+                .get()
+                .getKey();
     }
 
     /**
@@ -145,6 +154,10 @@ public final class StudentAnalytics {
      */
     public int countNumberOfFailedStudentsOlderThan20ParallelStream(
             final Student[] studentArray) {
-        return (int) Stream.of(studentArray).parallel().filter(s -> !s.checkIsCurrent() && s.getAge()>20 && s.getGrade() < 65).count();
+
+        return (int) Stream.of(studentArray)
+                .parallel()
+                .filter(s -> !s.checkIsCurrent() && s.getAge()>20 && s.getGrade() < 65)
+                .count();
     }
 }
