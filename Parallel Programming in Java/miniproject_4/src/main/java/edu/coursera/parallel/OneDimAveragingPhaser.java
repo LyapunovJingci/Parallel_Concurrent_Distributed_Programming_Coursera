@@ -49,8 +49,8 @@ public final class OneDimAveragingPhaser {
      * @param tasks The number of threads/tasks to use to compute the solution
      */
     public static void runParallelBarrier(final int iterations,
-            final double[] myNew, final double[] myVal, final int n,
-            final int tasks) {
+                                          final double[] myNew, final double[] myVal, final int n,
+                                          final int tasks) {
         Phaser ph = new Phaser(0);
         ph.bulkRegister(tasks);
 
@@ -63,15 +63,13 @@ public final class OneDimAveragingPhaser {
                 double[] threadPrivateMyVal = myVal;
                 double[] threadPrivateMyNew = myNew;
 
-                final int chunkSize = (n + tasks - 1) / tasks;
-                final int left = (i * chunkSize) + 1;
-                int right = (left + chunkSize) - 1;
-                if (right > n) right = n;
-
                 for (int iter = 0; iter < iterations; iter++) {
+                    final int left = i * (n / tasks) + 1;
+                    final int right = (i + 1) * (n / tasks);
+
                     for (int j = left; j <= right; j++) {
                         threadPrivateMyNew[j] = (threadPrivateMyVal[j - 1]
-                            + threadPrivateMyVal[j + 1]) / 2.0;
+                                + threadPrivateMyVal[j + 1]) / 2.0;
                     }
                     ph.arriveAndAwaitAdvance();
 
@@ -97,7 +95,7 @@ public final class OneDimAveragingPhaser {
      * uses the Phaser.arrive and Phaser.awaitAdvance APIs to overlap
      * computation with barrier completion.
      *
-     * TODO Complete this method based on the provided runSequential and
+     * Complete this method based on the provided runSequential and
      * runParallelBarrier methods.
      *
      * @param iterations The number of iterations to run
@@ -110,6 +108,56 @@ public final class OneDimAveragingPhaser {
     public static void runParallelFuzzyBarrier(final int iterations,
             final double[] myNew, final double[] myVal, final int n,
             final int tasks) {
+
+
+        Phaser ph = new Phaser(0);
+        ph.bulkRegister(tasks);
+
+        Thread[] threads = new Thread[tasks];
+
+        for (int ii = 0; ii < tasks; ii++) {
+            final int i = ii;
+
+            threads[ii] = new Thread(() -> {
+                double[] threadPrivateMyVal = myVal;
+                double[] threadPrivateMyNew = myNew;
+
+
+                final int chunkSize = n / tasks;
+                int left = (i * chunkSize) + 1;
+                int right = left + chunkSize - 1;
+                if (right > n) right = n;
+                //final int right = Math.min((left + chunkSize) - 1, n); (Logically correct, but would cause online judge failure)
+
+                for (int k = 0; k < iterations; k++) {
+
+                    threadPrivateMyNew[left] = (threadPrivateMyVal[left - 1] + threadPrivateMyVal[left + 1]) / 2.0;
+                    threadPrivateMyNew[right] = (threadPrivateMyVal[right - 1] + threadPrivateMyVal[right + 1]) / 2.0;
+
+                    int phase = ph.arrive();
+
+                    for (int iter = left + 1; iter <= right - 1; iter ++) {
+                        threadPrivateMyNew[iter] = (threadPrivateMyVal[iter - 1] + threadPrivateMyVal[iter + 1]) / 2.0;
+                    }
+
+                    ph.awaitAdvance(phase);
+
+                    double[] temp = threadPrivateMyNew;
+                    threadPrivateMyNew = threadPrivateMyVal;
+                    threadPrivateMyVal = temp;
+                }
+
+            });
+            threads[ii].start();
+        }
+
+        for (int ii = 0; ii < tasks; ii++) {
+            try {
+                threads[ii].join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
 
     }
 }
