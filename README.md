@@ -5,5 +5,5 @@ Homeworks and projects of "[Parallel, Concurrent and Distributed Programming in 
 
 ### Progress
 * [Parallel Programming](https://www.coursera.org/learn/parallel-programming-in-java) (finished)
-* [Concurrent Programming](https://www.coursera.org/learn/concurrent-programming-in-java) (update to week3)
+* [Concurrent Programming](https://www.coursera.org/learn/concurrent-programming-in-java) (finished)
 * [Distributed Programming](https://www.coursera.org/learn/distributed-programming-in-java) (upcoming)
