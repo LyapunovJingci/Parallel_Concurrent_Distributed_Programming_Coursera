@@ -1,12 +1,9 @@
 package edu.coursera.distributed;
 
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.File;
+import java.nio.file.Files;
 
 /**
  * A basic and very limited implementation of a file server that responds to GET
@@ -32,13 +29,10 @@ public final class FileServer {
          */
         while (true) {
 
-            // TODO Delete this once you start working on your solution.
-            throw new UnsupportedOperationException();
-
-            // TODO 1) Use socket.accept to get a Socket object
-
+            // Use socket.accept to get a Socket object
+            Socket s = socket.accept();
             /*
-             * TODO 2) Using Socket.getInputStream(), parse the received HTTP
+             * Using Socket.getInputStream(), parse the received HTTP
              * packet. In particular, we are interested in confirming this
              * message is a GET and parsing out the path to the file we are
              * GETing. Recall that for GET HTTP packets, the first line of the
@@ -46,9 +40,19 @@ public final class FileServer {
              *
              *     GET /path/to/file HTTP/1.1
              */
+            InputStream stream = s.getInputStream();
+            InputStreamReader reader = new InputStreamReader(stream);
+            BufferedReader bufferedReader = new BufferedReader(reader);
+
+            String line = bufferedReader.readLine();
+            assert line!=null;
+            assert line.startsWith("GET");
+            PCDPPath path = new PCDPPath(line.split(" ")[1]);
+            final String file = fs.readFile(path);
+
 
             /*
-             * TODO 3) Using the parsed path to the target file, construct an
+             * Using the parsed path to the target file, construct an
              * HTTP reply and write it to Socket.getOutputStream(). If the file
              * exists, the HTTP reply should be formatted as follows:
              *
@@ -67,6 +71,22 @@ public final class FileServer {
              *
              * Don't forget to close the output stream.
              */
+
+            OutputStream outputStream = s.getOutputStream();
+            PrintWriter printWriter = new PrintWriter(outputStream);
+
+            if (file != null) {
+                printWriter.write("HTTP/1.0 200 OK\r\n");
+                printWriter.write("Server: FileServer\r\n");
+                printWriter.write("\r\n");
+                printWriter.write(file);
+            } else {
+                printWriter.write("HTTP/1.0 404 Not Found\r\n");
+                printWriter.write("Server: FileServer\r\n");
+                printWriter.write("\r\n");
+            }
+
+            printWriter.close();
         }
     }
 }
