@@ -1,6 +1,6 @@
 # Parallel, Concurrent and Distributed Programming in Java
  
-Homeworks and projects of "[Parallel, Concurrent and Distributed Programming in Java](https://www.coursera.org/specializations/pcdp)" specialization provided by Rice University on Coursera
+Projects of "[Parallel, Concurrent and Distributed Programming in Java](https://www.coursera.org/specializations/pcdp)" specialization provided by Rice University on Coursera
 
 
 ### Progress
