@@ -10,3 +10,5 @@ Projects of "[Parallel, Concurrent and Distributed Programming in Java](https://
 
 ### Certificate
 [Certificate](Certificate.pdf)
+
+<img src="certificate.png" width="75%">
